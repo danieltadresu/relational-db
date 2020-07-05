@@ -1,0 +1,66 @@
+
+package controllers;
+
+import conexion.Conexion;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+
+import models.Postulante;
+
+public class PostulanteController implements iConexion<Postulante> {
+
+    private static final Conexion CONEXION = Conexion.obtenerEstadoConexion();
+    private PreparedStatement ps;
+    private ResultSet rs;
+    
+    public boolean executeStoredProcedure() {
+        
+        try
+        {
+            String SQL_CALL = "CALL SP_TESTING()";
+            ps = CONEXION.getConexion().prepareStatement(SQL_CALL);
+            rs = ps.executeQuery();
+            
+            return true;
+        }
+        catch(SQLException ex)
+        {
+            return false;
+        }
+        finally
+        {
+            CONEXION.cerrarConexion();
+        }
+    }
+    
+    @Override
+    public boolean create(Postulante t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean update(Postulante t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean delete(Object key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Postulante read(Object key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ArrayList<Postulante> readAll() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
+    
+}
