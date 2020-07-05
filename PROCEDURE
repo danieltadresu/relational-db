@@ -1,0 +1,61 @@
+DROP TABLE PUNTAJE_POSTULANTE;
+CREATE TABLE PUNTAJE_POSTULANTE (
+    run_postulante          number(9),
+    edad                    number(3),
+    puntaje_edad            number(3),
+    cantidad_cargas         number(3),
+    puntaje_cargas          number(3),
+    estado_civil            varchar2(60),
+    puntaje_estado_civil    number(3),
+    pueblo_ind_orig         varchar2(60),
+    puntaje_pueblo_ind_orig number(3),
+    monto_ahorro            number(10),
+    puntaje_monto_ahorro    number(3),
+    titulo                  varchar(60),
+    puntaje_titulo          number(3),
+    puntaje_total           number(20)
+);
+
+
+
+CREATE OR REPLACE PROCEDURE SP_ASIGNACION_PUNTAJE (
+    run_postulante    IN puntaje_postulante.run_postulante%type
+)
+is begin
+    insert into PUNTAJE_POSTULANTE values 
+    ( 
+        run_postulante,  
+        PKG_DATOS.get_edad(run_postulante), 
+        PKG_DATOS.get_ptje_edad(run_postulante),
+        nvl(PKG_DATOS.get_cantidad_cargas(run_postulante), 0),
+        nvl(PKG_DATOS.get_ptje_cargas( PKG_DATOS.get_cantidad_cargas(run_postulante) ), 0),
+        PKG_DATOS.get_estado_civil(run_postulante),
+        PKG_DATOS.get_ptje_estado_civ(run_postulante),
+        PKG_DATOS.get_acred_indigena(run_postulante),
+        PKG_DATOS.get_ptje_acred_indigena( PKG_DATOS.get_acred_indigena(run_postulante) ),
+        PKG_DATOS.get_monto_ahorro(run_postulante),
+        PKG_DATOS.get_ptje_monto_ahorro( PKG_DATOS.get_monto_ahorro(run_postulante) ),
+        PKG_DATOS.get_profesion(run_postulante),
+        PKG_DATOS.get_ptje_nivel_ed(run_postulante),
+        
+     
+       
+            
+           PKG_DATOS.get_puntaje_total ( 
+           
+           PKG_DATOS.get_id_region(run_postulante),
+           PKG_DATOS.get_ptje_edad(run_postulante),
+           nvl(PKG_DATOS.get_ptje_cargas( PKG_DATOS.get_cantidad_cargas(run_postulante) ), 0),
+           PKG_DATOS.get_ptje_estado_civ(run_postulante),
+           PKG_DATOS.get_ptje_acred_indigena( PKG_DATOS.get_acred_indigena(run_postulante) ),
+           PKG_DATOS.get_ptje_monto_ahorro( PKG_DATOS.get_monto_ahorro(run_postulante) ),
+           PKG_DATOS.get_ptje_nivel_ed(run_postulante)
+           )
+        
+    );
+end SP_ASIGNACION_PUNTAJE;
+
+
+execute SP_ASIGNACION_PUNTAJE(15980765);
+execute SP_ASIGNACION_PUNTAJE(17465390);
+execute SP_ASIGNACION_PUNTAJE(18709562);
