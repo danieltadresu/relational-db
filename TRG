@@ -10,7 +10,6 @@ begin
     return edad;
 end FN_CALCULAR_EDAD;
 
-
 create or replace function fn_calcular_ptje_edad
 ( fechaNacimiento   postulante.fecha_nacimiento%type ) return number
 is
@@ -26,21 +25,62 @@ begin
 end fn_calcular_ptje_edad;
 
 
+create or replace function fn_cantidad_cargas
+( runPostulante     postulante.run_postulante%type ) return number
+is
+    cantidad_cargas number(3);
+begin
+    BEGIN
+        select 
+            count(run_carga) into cantidad_cargas
+        from CARGA_FAMILIAR
+        where run_postulante = runPostulante
+        group by run_postulante;
+        
+        EXCEPTION 
+            when NO_DATA_FOUND then
+            cantidad_cargas := 0;
+    END;
+    return cantidad_cargas;
+end fn_cantidad_cargas;
+
+create or replace function fn_ptje_cargas
+( cantidad_cargasx number) return number
+is
+    puntaje_cargas  number(3);
+begin 
+    begin
+        select 
+            puntaje into puntaje_cargas
+        from puntaje_carga_familiar
+        where cantidad_cargasx between TRAMO_INF and TRAMO_SUP;
+        
+        EXCEPTION
+            when NO_DATA_FOUND then
+                puntaje_cargas := 0;
+    end;
+    return puntaje_cargas;
+end fn_ptje_cargas;
 
 
-CREATE OR REPLACE 
-trigger TRG_CALCULA_PUNTAJES 
+CREATE OR REPLACE trigger TRG_CALCULA_PUNTAJES 
 after INSERT or UPDATE on POSTULANTE
 for each row
 declare
-    run_post     postulante.run_postulante%type;
-    edad         number(10);
-    puntaje_edad number(10);
+    run_post                postulante.run_postulante%type;
+    edad                    number(10);
+    puntaje_edad            number(10);
+    cantidad_cargas         number(10);
+    ptje_cantidad_cargas    number(10);
 begin
     run_post := :new.run_postulante;
     edad := FN_CALCULAR_EDAD(:new.fecha_nacimiento);
     puntaje_edad := fn_calcular_ptje_edad(:new.fecha_nacimiento);
-    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad, puntaje_edad) VALUES (run_post, edad, puntaje_edad);
+    cantidad_cargas := fn_cantidad_cargas(:new.run_postulante);
+    ptje_cantidad_cargas := fn_ptje_cargas( fn_cantidad_cargas(cantidad_cargas) );
+    
+    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad, puntaje_edad, cantidad_cargas, puntaje_cargas)
+    VALUES (run_post, edad, puntaje_edad, cantidad_cargas, ptje_cantidad_cargas);
 end;
 
 
