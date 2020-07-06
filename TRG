@@ -1,0 +1,24 @@
+CREATE OR REPLACE 
+trigger TRG_CALCULA_PUNTAJES 
+after INSERT or UPDATE on POSTULANTE
+for each row
+declare
+    run_post    postulante.run_postulante%type;
+    edad        number(10);
+begin
+    run_post := :new.run_postulante;
+    edad := FN_CALCULAR_EDAD(:new.fecha_nacimiento);
+    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad) VALUES (run_post, edad);
+end;
+       
+CREATE OR REPLACE FUNCTION FN_CALCULAR_EDAD 
+( fechaNacimiento postulante.fecha_nacimiento%type ) return number 
+is 
+    edad number(3);
+begin
+    select
+        extract (YEAR FROM sysdate) - extract (YEAR FROM fechaNacimiento)
+        into edad
+    from dual;
+    return edad;
+end FN_CALCULAR_EDAD;
