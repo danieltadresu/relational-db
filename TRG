@@ -1,16 +1,3 @@
-CREATE OR REPLACE 
-trigger TRG_CALCULA_PUNTAJES 
-after INSERT or UPDATE on POSTULANTE
-for each row
-declare
-    run_post    postulante.run_postulante%type;
-    edad        number(10);
-begin
-    run_post := :new.run_postulante;
-    edad := FN_CALCULAR_EDAD(:new.fecha_nacimiento);
-    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad) VALUES (run_post, edad);
-end;
-       
 CREATE OR REPLACE FUNCTION FN_CALCULAR_EDAD 
 ( fechaNacimiento postulante.fecha_nacimiento%type ) return number 
 is 
@@ -22,3 +9,40 @@ begin
     from dual;
     return edad;
 end FN_CALCULAR_EDAD;
+
+
+create or replace function fn_calcular_ptje_edad
+( fechaNacimiento   postulante.fecha_nacimiento%type ) return number
+is
+    edad         number(3);
+    puntaje_edad number(5);
+begin
+    edad := FN_CALCULAR_EDAD(fechaNacimiento);
+    select
+        puntaje INTO puntaje_edad 
+    from PUNTAJE_EDAD
+    where edad between TRAMO_INF and TRAMO_SUP;
+    return puntaje_edad;
+end fn_calcular_ptje_edad;
+
+
+
+
+CREATE OR REPLACE 
+trigger TRG_CALCULA_PUNTAJES 
+after INSERT or UPDATE on POSTULANTE
+for each row
+declare
+    run_post     postulante.run_postulante%type;
+    edad         number(10);
+    puntaje_edad number(10);
+begin
+    run_post := :new.run_postulante;
+    edad := FN_CALCULAR_EDAD(:new.fecha_nacimiento);
+    puntaje_edad := fn_calcular_ptje_edad(:new.fecha_nacimiento);
+    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad, puntaje_edad) VALUES (run_post, edad, puntaje_edad);
+end;
+
+
+
+
