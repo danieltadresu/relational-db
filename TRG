@@ -63,6 +63,19 @@ begin
 end fn_ptje_cargas;
 
 
+create or replace function fn_estado_civil
+( id_estado_civil_post number) return varchar2
+is
+    estado_civil varchar2(100);
+begin
+    select
+        descripcion into estado_civil
+    from ESTADO_CIVIL
+    where id_estado_civil =  id_estado_civil_post;
+    return estado_civil;
+end fn_estado_civil;
+
+
 CREATE OR REPLACE trigger TRG_CALCULA_PUNTAJES 
 after INSERT or UPDATE on POSTULANTE
 for each row
@@ -72,15 +85,16 @@ declare
     puntaje_edad            number(10);
     cantidad_cargas         number(10);
     ptje_cantidad_cargas    number(10);
+     estado_civil            varchar2(45);
 begin
     run_post := :new.run_postulante;
     edad := FN_CALCULAR_EDAD(:new.fecha_nacimiento);
     puntaje_edad := fn_calcular_ptje_edad(:new.fecha_nacimiento);
     cantidad_cargas := fn_cantidad_cargas(:new.run_postulante);
     ptje_cantidad_cargas := fn_ptje_cargas( fn_cantidad_cargas(cantidad_cargas) );
-    
-    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad, puntaje_edad, cantidad_cargas, puntaje_cargas)
-    VALUES (run_post, edad, puntaje_edad, cantidad_cargas, ptje_cantidad_cargas);
+    estado_civil := fn_estado_civil(:new.id_estado_civil);
+    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad, puntaje_edad, cantidad_cargas, puntaje_cargas, estado_civil)
+    VALUES (run_post, edad, puntaje_edad, cantidad_cargas, ptje_cantidad_cargas, estado_civil);
 end;
 
 
