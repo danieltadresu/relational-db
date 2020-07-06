@@ -153,10 +153,17 @@ CREATE OR REPLACE PACKAGE BODY PKG_DATOS IS
     
     function get_monto_ahorro(runPostulante number) return number is
     begin
+        begin
        select
         monto_ahorrado INTO monto_ahorro
        from CUENTA_AHORRO
        where run_postulante = runPostulante;
+       
+       EXCEPTION
+        when NO_DATA_FOUND then
+            monto_ahorro := 0;
+        end;
+       
         return monto_ahorro;
     end get_monto_ahorro;
     
@@ -275,4 +282,3 @@ CREATE OR REPLACE PACKAGE BODY PKG_DATOS IS
     end get_ptje_promedio;
     
 end PKG_DATOS;
-
