@@ -169,10 +169,16 @@ CREATE OR REPLACE PACKAGE BODY PKG_DATOS IS
     
     function get_ptje_monto_ahorro( montoAhorro number ) return number is
     begin
+        begin
         select
          puntaje into ptje_monto_ahorro
         from PUNTAJE_MONTO_AHORRO
         where montoAhorro between TRAMO_INF and TRAMO_SUP;
+        
+            EXCEPTION
+             when NO_DATA_FOUND then
+                ptje_monto_ahorro := 0;
+        end;
         return ptje_monto_ahorro;
     end get_ptje_monto_ahorro;
     
