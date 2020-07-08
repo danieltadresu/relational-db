@@ -76,6 +76,31 @@ begin
 end fn_estado_civil;
 
 
+create or replace function fn_estado_civil
+( id_estado_civil_post number) return varchar2
+is
+    puntajeEstadoCivil number(10);
+begin
+    select
+        puntaje_est_civil into puntajeEstadoCivil
+    from ESTADO_CIVIL
+    where id_estado_civil = id_estado_civil_post;
+    return puntajeEstadoCivil;
+end fn_estado_civil;
+
+create or replace function fn_pueblo_ind
+(id_acreditacionx number) return varchar2
+is
+    descripcion varchar2(80);
+begin
+    select
+        descripcion into descripcion
+    from ACREDITACION_INDIGENA
+    where id_acreditacion = id_acreditacionx;
+    return descripcion;
+end fn_pueblo_ind;
+
+
 CREATE OR REPLACE trigger TRG_CALCULA_PUNTAJES 
 after INSERT or UPDATE on POSTULANTE
 for each row
@@ -85,7 +110,11 @@ declare
     puntaje_edad            number(10);
     cantidad_cargas         number(10);
     ptje_cantidad_cargas    number(10);
-     estado_civil            varchar2(45);
+    estado_civil            varchar2(45);
+    ptje_estado_civil       number(10);
+    acred_indg              varchar2(45);
+    ptje_acred_ind          number(10);
+    
 begin
     run_post := :new.run_postulante;
     edad := FN_CALCULAR_EDAD(:new.fecha_nacimiento);
@@ -93,10 +122,9 @@ begin
     cantidad_cargas := fn_cantidad_cargas(:new.run_postulante);
     ptje_cantidad_cargas := fn_ptje_cargas( fn_cantidad_cargas(cantidad_cargas) );
     estado_civil := fn_estado_civil(:new.id_estado_civil);
-    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad, puntaje_edad, cantidad_cargas, puntaje_cargas, estado_civil)
-    VALUES (run_post, edad, puntaje_edad, cantidad_cargas, ptje_cantidad_cargas, estado_civil);
+    ptje_estado_civil := fn_estado_civil(:new.id_estado_civil);
+    acred_indg := fn_pueblo_ind(:new.id_acreditacion);
+    
+    INSERT INTO PUNTAJE_POSTULANTE (run_postulante, edad, puntaje_edad, cantidad_cargas, puntaje_cargas, estado_civil, puntaje_estado_civil, pueblo_ind_orig)
+    VALUES (run_post, edad, puntaje_edad, cantidad_cargas, ptje_cantidad_cargas, estado_civil, ptje_estado_civil, acred_indg);
 end;
-
-
-
-
